@@ -69,7 +69,17 @@
 <script>
     // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     const BASE_API_URL = "https://script.google.com/macros/s/AKfycbxn2YDcPiYI3yMW_rZ4rq7CZ-I4OtZtEUy25tFcJmcIyIF311bdiPRJh4BFPliis6AL/exec";
+// 1. JALANKAN OTOMATIS SAAT HALAMAN DI-REFRESH
+    // Memeriksa apakah ada sesi login siswa yang tersimpan di memori browser
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedData = sessionStorage.getItem("studentSession");
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            tampilkanHalamanHasil(data);
+        }
+    });
 
+    // 2. PROSES EVENT SAAT TOMBOL LOGIN DI-KLIK
     document.getElementById('login-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -77,7 +87,7 @@
         const btnLogin = document.getElementById('btn-login');
         const errorDiv = document.getElementById('login-error');
         
-        // Proteksi UI saat loading
+        // Proteksi UI: Kunci tombol dan tampilkan indikator loading
         btnLogin.disabled = true;
         btnLogin.innerText = "Memeriksa...";
         errorDiv.classList.add('d-none');
@@ -86,58 +96,77 @@
         fetch(`${BASE_API_URL}?nisn=${nisnValue}`)
             .then(response => response.json())
             .then(data => {
+                // Kembalikan status tombol login
                 btnLogin.disabled = false;
-                btnLogin.innerText = "Login";
+                btnLogin.innerText = "Masuk & Cek Nilai";
 
                 if (data.status === "success") {
-                    // Pindah halaman jika sukses
-                    document.getElementById('login-section').classList.add('d-none');
-                    document.getElementById('result-section').classList.remove('d-none');
+                    // Simpan data login ke memori browser (Session Storage)
+                    sessionStorage.setItem("studentSession", JSON.stringify(data));
                     
-                    // Isi informasi siswa
-                    document.getElementById('student-name').innerText = data.nama;
-                    document.getElementById('student-nisn').innerText = data.nisn;
-                    
-                    // Render daftar mapel ke dalam tabel
-                    const tbody = document.getElementById('mapel-table-body');
-                    tbody.innerHTML = ""; // reset tabel
-                    
-                    data.mapel.forEach(item => {
-                        let badgeClass = "badge-kosong";
-                        let statusText = item.status;
-
-                        if (item.status.toLowerCase() === "tuntas") {
-                            badgeClass = "badge-tuntas";
-                        } else if (item.status.toLowerCase() === "tidak tuntas") {
-                            badgeClass = "badge-belum";
-                        }
-
-                        const row = `<tr>
-                            <td class="fw-medium">${item.nama_mapel}</td>
-                            <td class="text-center"><span class="${badgeClass}">${statusText}</span></td>
-                        </tr>`;
-                        tbody.innerHTML += row;
-                    });
-
+                    // Tampilkan data ke halaman hasil
+                    tampilkanHalamanHasil(data);
                 } else {
-                    // Jika NISN salah atau error backend
+                    // Tampilkan pesan jika NISN salah atau tidak ditemukan
                     errorDiv.innerText = data.message || "Terjadi kesalahan.";
                     errorDiv.classList.remove('d-none');
                 }
             })
             .catch(error => {
+                // Penanganan jika koneksi internet putus atau URL API salah
                 btnLogin.disabled = false;
-                btnLogin.innerText = "Login";
-                errorDiv.innerText = "Gagal terhubung ke server. Pastikan URL API benar.";
+                btnLogin.innerText = "Masuk & Cek Nilai";
+                errorDiv.innerText = "Gagal terhubung ke server. Pastikan URL API Anda sudah benar.";
                 errorDiv.classList.remove('d-none');
-                console.error(error);
+                console.error("Error Fetching Data:", error);
             });
     });
 
+    // 3. FUNGSI UNTUK MENAMPILKAN DATA NILAI KE HALAMAN WEB
+    function tampilkanHalamanHasil(data) {
+        // Tukar tampilan halaman (Sembunyikan login, Munculkan hasil)
+        document.getElementById('login-section').classList.add('d-none');
+        document.getElementById('result-section').classList.remove('d-none');
+        
+        // Isi informasi teks siswa
+        document.getElementById('student-name').innerText = data.nama;
+        document.getElementById('student-nisn').innerText = data.nisn;
+        
+        // Render tabel daftar mata pelajaran secara dinamis
+        const tbody = document.getElementById('mapel-table-body');
+        tbody.innerHTML = ""; // Bersihkan sisa data sebelumnya jika ada
+        
+        data.mapel.forEach(item => {
+            let badgeClass = "badge-kosong";
+            let statusText = item.status;
+
+            // Penyesuaian warna badge berdasarkan status ketuntasan
+            if (item.status.toLowerCase() === "tuntas") {
+                badgeClass = "badge-tuntas";
+            } else if (item.status.toLowerCase() === "tidak tuntas") {
+                badgeClass = "badge-belum";
+            }
+
+            // Susun baris tabel HTML
+            const row = `<tr>
+                <td class="fw-medium">${item.nama_mapel}</td>
+                <td class="text-center"><span class="${badgeClass}">${statusText}</span></td>
+            </tr>`;
+            
+            // Masukkan baris ke dalam tabel
+            tbody.innerHTML += row;
+        });
+    }
+
+    // 4. FUNGSI TOMBOL KELUAR (LOGOUT)
     function logout() {
-        // Reset form login
+        // Hancurkan memori login di browser agar aman dari intipan siswa lain
+        sessionStorage.removeItem("studentSession");
+
+        // Reset input form login agar kosong kembali
         document.getElementById('nisn').value = "";
-        // Tukar halaman kembali ke login
+        
+        // Tukar kembali halaman (Sembunyikan hasil, Munculkan login)
         document.getElementById('result-section').classList.add('d-none');
         document.getElementById('login-section').classList.remove('d-none');
     }
