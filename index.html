@@ -85,7 +85,7 @@
             .then(response => response.json())
             .then(data => {
                 btnLogin.disabled = false;
-                btnLogin.innerText = "Masuk & Cek Nilai";
+                btnLogin.innerText = "Login";
 
                 if (data.status === "success") {
                     // Pindah halaman jika sukses
@@ -125,7 +125,7 @@
             })
             .catch(error => {
                 btnLogin.disabled = false;
-                btnLogin.innerText = "Masuk & Cek Nilai";
+                btnLogin.innerText = "Login";
                 errorDiv.innerText = "Gagal terhubung ke server. Pastikan URL API benar.";
                 errorDiv.classList.remove('d-none');
                 console.error(error);
