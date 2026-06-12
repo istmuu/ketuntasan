@@ -37,18 +37,16 @@
         <div id="login-error" class="alert alert-danger mt-3 text-center d-none" role="alert"></div>
     </div>
 
-    <!-- 2. HALAMAN DASHBOARD / HASIL (Hidden secara default) -->
+   <!-- 2. HALAMAN DASHBOARD / HASIL (Hidden secara default) -->
     <div id="result-section" class="card card-result p-4 d-none">
-        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
-            <div>
-                <h3 class="fw-bold text-success mb-0" id="student-name">Nama Siswa</h3>
-                <span class="text-muted">NISN: <span id="student-nisn">00000000</span></span>
-            </div>
-            <button onclick="logout()" class="btn btn-outline-danger btn-sm fw-bold">Keluar</button>
+        <!-- Bagian Atas: Sekarang Fokus Hanya Untuk Nama & NISN -->
+        <div class="border-bottom pb-3 mb-4">
+            <h3 class="fw-bold text-success mb-1" id="student-name">Nama Siswa</h3>
+            <span class="text-muted">NISN: <span id="student-nisn">00000000</span></span>
         </div>
 
         <h5 class="fw-bold mb-3 text-secondary">Status Ketuntasan Mata Pelajaran:</h5>
-        <div class="table-responsive">
+        <div class="table-responsive mb-4">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
@@ -61,8 +59,12 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Tombol Keluar Baru: Dipindah ke Bawah, Full Width agar Nyaman Di-klik di HP -->
+        <div class="d-grid mt-2">
+            <button onclick="logout()" class="btn btn-outline-danger btn-lg fw-bold">Keluar & Kembali</button>
+        </div>
     </div>
-</div>
 
 <script>
     // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
